@@ -3,10 +3,8 @@
 -- Scene notes go here
 ---------------------------------------------------------------------------------
 local widget =require("widget")
-local json = require("json")
-local http = require("socket.http")
-local ltn12 = require("ltn12")
 local storyboard = require( "storyboard" )
+local networking=require("networking")
 local scene = storyboard.newScene()
 
 -- Clear previous scene
@@ -21,176 +19,11 @@ local sandwichComp=false
 ---------------------------------------------------------------------------------
 -- BEGINNING OF YOUR IMPLEMENTATION
 ---------------------------------------------------------------------------------
---connect to the server to authenticate user
-
---requesting a sandwitch
-
-local function SandwitchComplete(i_status)
-  local URL = "http://localhost:60000/BoggleService.svc/games"
-
-  local headers = {}
-
-  local body={
-  Name=i_status
-  }
-  headers["Content-Type"] = "application/json"
-  headers["application-type"] = "REST"
-  headers["Content-Length"] = string.len(json.encode( body ))
-
-  local params = {}
-  params.headers = headers
-  params.body=json.encode( body )
-  print(params.headers)
-  print(params.body)
-
-
-  response_body = {}
-         local body, code, headers = http.request{
-                             url = URL ,
-                             method = "PUT",
-                             headers = params.headers,
-                             source = ltn12.source.string(params.body),
-                             sink = ltn12.sink.table(response_body)
-                             }
-         responseTable=json.decode(response_body[1])
-        print("response body = ",responseTable.Name )
-  if(responseTable.Name=="done") then
-    storyboard.gotoScene( "scene_results" )
-end
-
-
-end
-
-
-local function RequestASandwitch(i_Sandwitch)
-  local URL = "http://localhost:60000/BoggleService.svc/games"
-
-  local headers = {}
-
-  local body={
-  Name=i_Sandwitch
-  }
-  headers["Content-Type"] = "application/json"
-  headers["application-type"] = "REST"
-  headers["Content-Length"] = string.len(json.encode( body ))
-
-  local params = {}
-  params.headers = headers
-  params.body=json.encode( body )
-  print(params.headers)
-  print(params.body)
-
-
-  response_body = {}
-         local body, code, headers = http.request{
-                             url = URL ,
-                             method = "PUT",
-                             headers = params.headers,
-                             source = ltn12.source.string(params.body),
-                             sink = ltn12.sink.table(response_body)
-                             }
-         print("Body = ", body)
-         print("code = ", code)
-         print("headers = ", headers[1])
-         responseTable=json.decode(response_body[1])
-        print("response body = ",responseTable.Name )
-
-        myText = display.newText( "", 0, 0, native.systemFont, 12 )
-        myText.x = 50 ; myText.y = 50
-        myText:setFillColor( 1, 1, 1 )
-        myText.anchorX = 0
-
-        -- Change the text
-
-
-end
-
-
-
-local function joinGame(i_userToken)
-  local URL = "http://localhost:60000/BoggleService.svc/games"
-
-  local headers = {}
-
-  local body={
-  UserToken=i_userToken
-  }
-  headers["Content-Type"] = "application/json"
-  headers["application-type"] = "REST"
-  headers["Content-Length"] = string.len(json.encode( body ))
-
-  local params = {}
-  params.headers = headers
-  params.body=json.encode( body )
-  print(params.headers)
-  print(params.body)
-
-
-  response_body = {}
-         local body, code, headers = http.request{
-                             url = URL ,
-                             method = "POST",
-                             headers = params.headers,
-                             source = ltn12.source.string(params.body),
-                             sink = ltn12.sink.table(response_body)
-                             }
-         print("Body = ", body)
-         print("code = ", code)
-         print("headers = ", headers[1])
-         responseTable=json.decode(response_body[1])
-        print("response body = ",responseTable.GameID )
-
-
-end
-local function connectToServer(name)
-
-  local URL = "http://localhost:60000/BoggleService.svc/users"
-
-  local headers = {}
-
-  local body={
-  Nickname=name
-  }
-  headers["Content-Type"] = "application/json"
-  headers["application-type"] = "REST"
-  headers["Content-Length"] = string.len(json.encode( body ))
-
-  local params = {}
-  params.headers = headers
-  params.body=json.encode( body )
-  print(params.headers)
-  print(params.body)
-
-
-  response_body = {}
-         local body, code, headers = http.request{
-                             url = URL ,
-                             method = "POST",
-                             headers = params.headers,
-                             source = ltn12.source.string(params.body),
-                             sink = ltn12.sink.table(response_body)
-                             }
-         print("Body = ", body)
-         print("code = ", code)
-         print("headers = ", headers[1])
-         responseTable=json.decode(response_body[1])
-        print("response body = ",responseTable.UserToken )
-
-        myText = display.newText( "", 0, 0, native.systemFont, 12 )
-        myText.x = 50 ; myText.y = 50
-        myText:setFillColor( 1, 1, 1 )
-        myText.anchorX = 0
-
-        -- Change the text
-
-      joinGame(responseTable.UserToken)
-
-end
 
 local function handleButtonEventRequest(event)
   local phase=event.phase
   if "ended"==phase then
-    RequestASandwitch("Cheese Sandwich")
+    networking.RequestASandwitch("Cheese Sandwich")
   end
 end
 
@@ -204,7 +37,7 @@ end
 -- Called when the scene's view does not exist:
 function scene:createScene( event )
   local group = self.view
-  connectToServer("mom")
+  networking.connectToServer("mom")
 
   requestButton=widget.newButton({
    left=10,
@@ -226,8 +59,12 @@ function scene:createScene( event )
     onEvent=handleButtonEventBack
   })
 
+  myText = display.newText( "", 0, 0, native.systemFont, 12 )
+  myText.x = 50 ; myText.y = 50
+  myText:setFillColor( 1, 1, 1 )
+  myText.anchorX = 0
 
-local myClosure = function() return SandwitchComplete( "" ) end
+local myClosure = function() return networking.SandwitchComplete( "" ) end
 
 timer.performWithDelay( 2000, myClosure,0)
 

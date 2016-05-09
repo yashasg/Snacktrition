@@ -3,10 +3,8 @@
 -- Scene notes go here
 ---------------------------------------------------------------------------------
 local widget =require("widget")
-local json = require("json")
-local http = require("socket.http")
-local ltn12 = require("ltn12")
 local storyboard = require( "storyboard" )
+local networking=require("networking")
 local scene = storyboard.newScene()
 
 -- Clear previous scene
@@ -172,14 +170,14 @@ end
 local function handleButtonEventDone(event)
   local phase=event.phase
   if "ended"==phase then
-  SandwitchComplete("done")
+  networking.SandwitchComplete("done")
   end
 end
 
 -- Called when the scene's view does not exist:
 function scene:createScene( event )
   local group = self.view
-  connectToServer("child")
+  networking.connectToServer("child")
 
   breadButton=widget.newButton({
    left=10,
@@ -217,7 +215,7 @@ function scene:createScene( event )
     onEvent=handleButtonEventDone
   })
 
-  local myClosure = function() return SandwitchComplete( "" ) end
+  local myClosure = function() return networking.SandwitchComplete( "" ) end
 
   timer.performWithDelay( 2000, myClosure,0)
 
