@@ -22,6 +22,53 @@ local imageTable={}
 -- BEGINNING OF YOUR IMPLEMENTATION
 ---------------------------------------------------------------------------------
 --connect to the server to authenticate user
+
+
+local function joinGame(i_userToken)
+  local URL = "http://localhost:60000/BoggleService.svc/games"
+
+  local headers = {}
+
+  local body={
+  UserToken=i_userToken
+  }
+  headers["Content-Type"] = "application/json"
+  headers["application-type"] = "REST"
+  headers["Content-Length"] = string.len(json.encode( body ))
+
+  local params = {}
+  params.headers = headers
+  params.body=json.encode( body )
+  print(params.headers)
+  print(params.body)
+
+
+  response_body = {}
+         local body, code, headers = http.request{
+                             url = URL ,
+                             method = "POST",
+                             headers = params.headers,
+                             source = ltn12.source.string(params.body),
+                             sink = ltn12.sink.table(response_body)
+                             }
+         print("Body = ", body)
+         print("code = ", code)
+         print("headers = ", headers[1])
+         responseTable=json.decode(response_body[1])
+        print("response body = ",responseTable.GameID )
+
+        myText = display.newText( "Hello", 0, 0, native.systemFont, 12 )
+        myText.x = 50 ; myText.y = 50
+        myText:setFillColor( 1, 1, 1 )
+        myText.anchorX = 0
+
+        -- Change the text
+        if code==201 then
+        myText.text = name.." Joined Game"
+      end
+
+
+end
 local function connectToServer(name)
 
   local URL = "http://localhost:60000/BoggleService.svc/users"
@@ -53,7 +100,8 @@ local function connectToServer(name)
          print("Body = ", body)
          print("code = ", code)
          print("headers = ", headers[1])
-        print("response body = ", response_body[1])
+         responseTable=json.decode(response_body[1])
+        print("response body = ",responseTable.UserToken )
 
         myText = display.newText( "Hello", 0, 0, native.systemFont, 12 )
         myText.x = 50 ; myText.y = 50
@@ -64,6 +112,8 @@ local function connectToServer(name)
         if code==201 then
         myText.text = name.." Connected"
       end
+
+      joinGame(responseTable.UserToken)
 
 end
 
