@@ -2,6 +2,7 @@
 -- SCENE NAME
 -- Scene notes go here
 ---------------------------------------------------------------------------------
+local widget =require("widget")
 local json = require("json")
 local http = require("socket.http")
 local ltn12 = require("ltn12")
@@ -13,10 +14,100 @@ storyboard.removeAll()
 
 -- local forward references should go here --
 local myText
+local requestButton
+local backButton
+local imageTable={}
 ---------------------------------------------------------------------------------
 -- BEGINNING OF YOUR IMPLEMENTATION
 ---------------------------------------------------------------------------------
 --connect to the server to authenticate user
+
+--requesting a sandwitch
+
+
+local function RequestASandwitch()
+  local URL = "http://localhost:60000/BoggleService.svc/games"
+
+  local headers = {}
+
+  local body={
+  Name="Cheese Sandwitch"
+  }
+  headers["Content-Type"] = "application/json"
+  headers["application-type"] = "REST"
+  headers["Content-Length"] = string.len(json.encode( body ))
+
+  local params = {}
+  params.headers = headers
+  params.body=json.encode( body )
+  print(params.headers)
+  print(params.body)
+
+
+  response_body = {}
+         local body, code, headers = http.request{
+                             url = URL ,
+                             method = "PUT",
+                             headers = params.headers,
+                             source = ltn12.source.string(params.body),
+                             sink = ltn12.sink.table(response_body)
+                             }
+         print("Body = ", body)
+         print("code = ", code)
+         print("headers = ", headers[1])
+         responseTable=json.decode(response_body[1])
+        print("response body = ",responseTable.Name )
+
+        myText = display.newText( "Hello", 0, 0, native.systemFont, 12 )
+        myText.x = 50 ; myText.y = 50
+        myText:setFillColor( 1, 1, 1 )
+        myText.anchorX = 0
+
+        -- Change the text
+        if code==201 then
+        myText.text = name.." Joined Game"
+      end
+
+
+end
+
+
+
+local function joinGame(i_userToken)
+  local URL = "http://localhost:60000/BoggleService.svc/games"
+
+  local headers = {}
+
+  local body={
+  UserToken=i_userToken
+  }
+  headers["Content-Type"] = "application/json"
+  headers["application-type"] = "REST"
+  headers["Content-Length"] = string.len(json.encode( body ))
+
+  local params = {}
+  params.headers = headers
+  params.body=json.encode( body )
+  print(params.headers)
+  print(params.body)
+
+
+  response_body = {}
+         local body, code, headers = http.request{
+                             url = URL ,
+                             method = "POST",
+                             headers = params.headers,
+                             source = ltn12.source.string(params.body),
+                             sink = ltn12.sink.table(response_body)
+                             }
+         print("Body = ", body)
+         print("code = ", code)
+         print("headers = ", headers[1])
+         responseTable=json.decode(response_body[1])
+        print("response body = ",responseTable.GameID )
+
+
+end
 local function connectToServer(name)
 
   local URL = "http://localhost:60000/BoggleService.svc/users"
@@ -48,7 +139,8 @@ local function connectToServer(name)
          print("Body = ", body)
          print("code = ", code)
          print("headers = ", headers[1])
-        print("response body = ", response_body[1])
+         responseTable=json.decode(response_body[1])
+        print("response body = ",responseTable.UserToken )
 
         myText = display.newText( "Hello", 0, 0, native.systemFont, 12 )
         myText.x = 50 ; myText.y = 50
@@ -57,15 +149,52 @@ local function connectToServer(name)
 
         -- Change the text
         if code==201 then
-        myText.text =name.. " Connected"
+        myText.text = name.." Connected"
       end
 
+      joinGame(responseTable.UserToken)
+
+end
+
+local function handleButtonEventRequest(event)
+  local phase=event.phase
+  if "ended"==phase then
+    RequestASandwitch()
+  end
+end
+
+local function handleButtonEventBack(event)
+  local phase=event.phase
+  if "ended"==phase then
+    storyboard.gotoScene( "scene_splash" )
+  end
 end
 
 -- Called when the scene's view does not exist:
 function scene:createScene( event )
   local group = self.view
   connectToServer("mom")
+
+  requestButton=widget.newButton({
+   left=10,
+    top=100,
+    width=250,
+    height=50,
+      label="Request Cheese Sandwitch",
+    defaultFile="button.png",
+    onEvent=handleButtonEventRequest
+  })
+
+  backButton=widget.newButton({
+   left=10,
+    top=400,
+    width=50,
+    height=50,
+    defaultFile="button.png",
+    label="Back",
+    onEvent=handleButtonEventBack
+  })
+
 
 end
 
@@ -82,6 +211,7 @@ function scene:enterScene( event )
   local group = self.view
 
   group:insert( myText )
+  group:insert(requestButton)
 
 end
 
@@ -89,6 +219,9 @@ end
 -- Called when scene is about to move offscreen:
 function scene:exitScene( event )
   local group = self.view
+  for i=1,#imageTable do
+    imageTable[i]:removeSelf()
+  end
 
 end
 
