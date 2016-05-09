@@ -1,13 +1,14 @@
 local networking={}
 
 local myText =display.newText( "", 0, 0, native.systemFont, 12 )
-        myText.x = 50 ; myText.y = 50
+        myText.x = 50 ; myText.y = 450
         myText:setFillColor( 1, 1, 1 )
         myText.anchorX = 0
 
 local json = require("json")
 local http = require("socket.http")
 local ltn12 = require("ltn12")
+local storyboard = require( "storyboard" )
 function networking.SandwitchComplete(i_status)
   local URL = "http://localhost:60000/BoggleService.svc/games"
 
@@ -42,6 +43,7 @@ function networking.SandwitchComplete(i_status)
         myText.text="make a ".. responseTable.Name
         end
   if(responseTable.Name=="done") then
+    myText.text=""
     storyboard.gotoScene( "scene_results" )
 end
 
