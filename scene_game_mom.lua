@@ -17,6 +17,7 @@ local myText
 local requestButton
 local backButton
 local imageTable={}
+local sandwichComp=false
 ---------------------------------------------------------------------------------
 -- BEGINNING OF YOUR IMPLEMENTATION
 ---------------------------------------------------------------------------------
@@ -24,14 +25,51 @@ local imageTable={}
 
 --requesting a sandwitch
 
-
-local function RequestASandwitch()
+local function SandwitchComplete(i_status)
   local URL = "http://localhost:60000/BoggleService.svc/games"
 
   local headers = {}
 
   local body={
-  Name="Cheese Sandwitch"
+  Name=i_status
+  }
+  headers["Content-Type"] = "application/json"
+  headers["application-type"] = "REST"
+  headers["Content-Length"] = string.len(json.encode( body ))
+
+  local params = {}
+  params.headers = headers
+  params.body=json.encode( body )
+  print(params.headers)
+  print(params.body)
+
+
+  response_body = {}
+         local body, code, headers = http.request{
+                             url = URL ,
+                             method = "PUT",
+                             headers = params.headers,
+                             source = ltn12.source.string(params.body),
+                             sink = ltn12.sink.table(response_body)
+                             }
+         responseTable=json.decode(response_body[1])
+        print("response body = ",responseTable.Name )
+  if(responseTable.Name=="Done") then
+    sandwichComp=true
+    return sandwichComp
+end
+
+
+end
+
+
+local function RequestASandwitch(i_Sandwitch)
+  local URL = "http://localhost:60000/BoggleService.svc/games"
+
+  local headers = {}
+
+  local body={
+  Name=i_Sandwitch
   }
   headers["Content-Type"] = "application/json"
   headers["application-type"] = "REST"
@@ -159,7 +197,7 @@ end
 local function handleButtonEventRequest(event)
   local phase=event.phase
   if "ended"==phase then
-    RequestASandwitch()
+    RequestASandwitch("Cheese Sandwich")
   end
 end
 
@@ -195,6 +233,10 @@ function scene:createScene( event )
     onEvent=handleButtonEventBack
   })
 
+
+local myClosure = function() return SandwitchComplete( "" ) end
+
+timer.performWithDelay( 2000, myClosure,0)
 
 end
 

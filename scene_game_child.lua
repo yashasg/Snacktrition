@@ -17,11 +17,48 @@ local myText
 local breadButton
 local cheeseButton
 local backButton
+local doneButton
 local imageTable={}
 ---------------------------------------------------------------------------------
 -- BEGINNING OF YOUR IMPLEMENTATION
 ---------------------------------------------------------------------------------
 --connect to the server to authenticate user
+
+--check sandwich status
+
+local function SandwitchComplete(i_status)
+  local URL = "http://localhost:60000/BoggleService.svc/games"
+
+  local headers = {}
+
+  local body={
+  Name=i_status
+  }
+  headers["Content-Type"] = "application/json"
+  headers["application-type"] = "REST"
+  headers["Content-Length"] = string.len(json.encode( body ))
+
+  local params = {}
+  params.headers = headers
+  params.body=json.encode( body )
+  print(params.headers)
+  print(params.body)
+
+
+  response_body = {}
+         local body, code, headers = http.request{
+                             url = URL ,
+                             method = "PUT",
+                             headers = params.headers,
+                             source = ltn12.source.string(params.body),
+                             sink = ltn12.sink.table(response_body)
+                             }
+         responseTable=json.decode(response_body[1])
+        print("response body = ",responseTable.Name )
+  if(responseTable.Name=="Cheese Sandwich") then
+mytext.text="make a ".. responseTable.Name
+  end
+end
 
 
 local function joinGame(i_userToken)
@@ -144,6 +181,13 @@ local function handleButtonEventBack(event)
   end
 end
 
+local function handleButtonEventDone(event)
+  local phase=event.phase
+  if "ended"==phase then
+  SandwitchComplete("done")
+  end
+end
+
 -- Called when the scene's view does not exist:
 function scene:createScene( event )
   local group = self.view
@@ -174,6 +218,15 @@ function scene:createScene( event )
     defaultFile="button.png",
     label="Back",
     onEvent=handleButtonEventBack
+  })
+  doneButton=widget.newButton({
+   left=220,
+    top=400,
+    width=50,
+    height=50,
+    defaultFile="button.png",
+    label="done",
+    onEvent=handleButtonEventDone
   })
 
 
