@@ -54,9 +54,8 @@ local function SandwitchComplete(i_status)
                              }
          responseTable=json.decode(response_body[1])
         print("response body = ",responseTable.Name )
-  if(responseTable.Name=="Done") then
-    sandwichComp=true
-    return sandwichComp
+  if(responseTable.Name=="done") then
+    storyboard.gotoScene( "scene_results" )
 end
 
 
@@ -96,15 +95,12 @@ local function RequestASandwitch(i_Sandwitch)
          responseTable=json.decode(response_body[1])
         print("response body = ",responseTable.Name )
 
-        myText = display.newText( "Hello", 0, 0, native.systemFont, 12 )
+        myText = display.newText( "", 0, 0, native.systemFont, 12 )
         myText.x = 50 ; myText.y = 50
         myText:setFillColor( 1, 1, 1 )
         myText.anchorX = 0
 
         -- Change the text
-        if code==201 then
-        myText.text = name.." Joined Game"
-      end
 
 
 end
@@ -180,15 +176,12 @@ local function connectToServer(name)
          responseTable=json.decode(response_body[1])
         print("response body = ",responseTable.UserToken )
 
-        myText = display.newText( "Hello", 0, 0, native.systemFont, 12 )
+        myText = display.newText( "", 0, 0, native.systemFont, 12 )
         myText.x = 50 ; myText.y = 50
         myText:setFillColor( 1, 1, 1 )
         myText.anchorX = 0
 
         -- Change the text
-        if code==201 then
-        myText.text = name.." Connected"
-      end
 
       joinGame(responseTable.UserToken)
 

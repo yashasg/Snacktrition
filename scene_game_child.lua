@@ -13,7 +13,10 @@ local scene = storyboard.newScene()
 storyboard.removeAll()
 
 -- local forward references should go here --
-local myText
+local myText =display.newText( "", 0, 0, native.systemFont, 12 )
+        myText.x = 50 ; myText.y = 50
+        myText:setFillColor( 1, 1, 1 )
+        myText.anchorX = 0
 local breadButton
 local cheeseButton
 local backButton
@@ -56,8 +59,11 @@ local function SandwitchComplete(i_status)
          responseTable=json.decode(response_body[1])
         print("response body = ",responseTable.Name )
   if(responseTable.Name=="Cheese Sandwich") then
-mytext.text="make a ".. responseTable.Name
+  myText.text="make a ".. responseTable.Name
   end
+  if(i_status=="done") then
+      storyboard.gotoScene( "scene_results" )
+    end
 end
 
 
@@ -94,15 +100,7 @@ local function joinGame(i_userToken)
          responseTable=json.decode(response_body[1])
         print("response body = ",responseTable.GameID )
 
-        myText = display.newText( "Hello", 0, 0, native.systemFont, 12 )
-        myText.x = 50 ; myText.y = 50
-        myText:setFillColor( 1, 1, 1 )
-        myText.anchorX = 0
 
-        -- Change the text
-        if code==201 then
-        myText.text = name.." Joined Game"
-      end
 
 
 end
@@ -139,16 +137,6 @@ local function connectToServer(name)
          print("headers = ", headers[1])
          responseTable=json.decode(response_body[1])
         print("response body = ",responseTable.UserToken )
-
-        myText = display.newText( "Hello", 0, 0, native.systemFont, 12 )
-        myText.x = 50 ; myText.y = 50
-        myText:setFillColor( 1, 1, 1 )
-        myText.anchorX = 0
-
-        -- Change the text
-        if code==201 then
-        myText.text = name.." Connected"
-      end
 
       joinGame(responseTable.UserToken)
 
@@ -229,6 +217,9 @@ function scene:createScene( event )
     onEvent=handleButtonEventDone
   })
 
+  local myClosure = function() return SandwitchComplete( "" ) end
+
+  timer.performWithDelay( 2000, myClosure,0)
 
 end
 

@@ -10,7 +10,7 @@ local scene = storyboard.newScene()
 storyboard.removeAll()
 
 -- local forward references should go here --
-
+local myText=display.newText( " ", 0, 0, native.systemFont, 12 )
 
 ---------------------------------------------------------------------------------
 -- BEGINNING OF YOUR IMPLEMENTATION
@@ -20,7 +20,10 @@ storyboard.removeAll()
 -- Called when the scene's view does not exist:
 function scene:createScene( event )
   local group = self.view
-
+  myText.x = 50 ; myText.y = 50
+  myText:setFillColor( 1, 1, 1 )
+  myText.anchorX = 0
+  myText.text="Congratulations Mom and child \n You have made a sandwich together,\nThank each other for their love and cooperation"
 end
 
 
@@ -34,6 +37,7 @@ end
 -- Called immediately after scene has moved onscreen:
 function scene:enterScene( event )
   local group = self.view
+  group:insert(myText)
 
 end
 
@@ -63,7 +67,7 @@ end
 function scene:overlayBegan( event )
   local group = self.view
   local overlay_name = event.sceneName  -- name of the overlay scene
-  
+
 end
 
 
